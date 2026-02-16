@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Old School Barber</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <section class="recuperacao">
+        <div class="recuperacao-container">
+
+            <h2>Esqueceu sua senha?</h2>
+            <p>Digite seu e-mail cadastrado e enviaremos um link para redefinir sua senha.</p>
+
+            <form action="{{ url_for('esqueci_senha') }}" method="POST">
+
+                <div class="input-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" name="email" required>
+                </div>
+
+                <button type="submit" class="btn-recuperar">
+                    Enviar link de recuperação
+                </button>
+
+            </form>
+
+            <p class="voltar-login">
+                <a href="{{ url_for('login') }}">Voltar para o login</a>
+            </p>
+
+        </div>
+    </section>
+
+</body>
+
+</html>

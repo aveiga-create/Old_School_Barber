@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha - Old School Barber</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <section class="resetar">
+        <div class="resetar-container">
+
+            <h2>Redefinir sua senha</h2>
+            <p>Digite sua nova senha abaixo.</p>
+
+            <form action="" method="POST">
+
+                <div class="input-group">
+                    <label for="senha">Nova senha</label>
+                    <input type="password" name="senha" required minlength="6">
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmar_senha">Confirmar nova senha</label>
+                    <input type="password" name="confirmar_senha" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn-resetar">
+                    Atualizar senha
+                </button>
+
+            </form>
+
+            <p class="voltar-login">
+                <a href="{{ url_for('login') }}">Voltar para o login</a>
+            </p>
+
+        </div>
+    </section>
+
+</body>
+
+</html>

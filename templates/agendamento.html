@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento - Old School Barber</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <section class="agendamento">
+        <div class="agendamento-container">
+
+            <h2>Agende seu Horário</h2>
+            <p>Escolha o barbeiro, serviço e data para visualizar os horários disponíveis.</p>
+
+
+            <form action="{{ url_for('agendamento') }}" method="POST">
+
+                <div class="input-group">
+                    <label for="barbeiro">Barbeiro</label>
+                    <select name="barbeiro_id" required>
+                        <option value="">Selecione</option>
+                        {% for barbeiro in barbeiros %}
+                        <option value="{{ barbeiro.id }}" {% if barbeiro.id|string==request.form.get('barbeiro_id')
+                            %}selected{% endif %}>
+                            {{ barbeiro.nome }} - {{ barbeiro.especialidade }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div class="input-group">
+                    <label for="servico">Serviço</label>
+                    <select name="servico" required>
+                        <option value="">Selecione</option>
+                        <option value="Corte Clássico">Corte Clássico</option>
+                        <option value="Barba Tradicional">Barba Tradicional</option>
+                        <option value="Corte + Barba">Corte + Barba</option>
+                        <option value="Tratamento Premium">Tratamento Premium</option>
+                    </select>
+                </div>
+
+
+                <div class="input-group">
+                    <label for="data">Data</label>
+                    <input type="date" name="data" required value="{{ request.form.get('data', '') }}">
+                </div>
+
+
+                <button type="submit" name="acao" value="buscar" class="btn-buscar">
+                    Ver Horários Disponíveis
+                </button>
+
+
+                {% if horarios is defined %}
+
+                <div class="horarios-disponiveis">
+                    <h3>Horários Disponíveis</h3>
+
+                    {% if horarios %}
+                    <div class="grade-horarios">
+                        {% for horario in horarios %}
+                        <button type="submit" name="horario" value="{{ horario }}" class="btn-horario">
+                            {{ horario }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="sem-horario">
+                        Nenhum horário disponível nesta data.
+                    </p>
+                    {% endif %}
+
+                </div>
+
+                {% endif %}
+
+            </form>
+
+            <p class="voltar">
+                <a href="{{ url_for('index') }}">Voltar ao início</a>
+            </p>
+
+        </div>
+    </section>
+
+</body>
+
+</html>
