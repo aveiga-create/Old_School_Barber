@@ -14,70 +14,62 @@
         <div class="agendamento-container">
 
             <h2>Agende seu Horário</h2>
-            <p>Escolha o barbeiro, serviço e data para visualizar os horários disponíveis.</p>
+            <p>Escolha o barbeiro, serviço, data e horário.</p>
 
+            <!-- MENSAGENS -->
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
 
             <form action="{{ url_for('agendamento') }}" method="POST">
 
+                <!-- BARBEIRO -->
                 <div class="input-group">
-                    <label for="barbeiro">Barbeiro</label>
-                    <select name="barbeiro_id" required>
+                    <label>Barbeiro</label>
+                    <select name="barbeiro" required>
                         <option value="">Selecione</option>
                         {% for barbeiro in barbeiros %}
-                        <option value="{{ barbeiro.id }}" {% if barbeiro.id|string==request.form.get('barbeiro_id')
-                            %}selected{% endif %}>
+                        <option value="{{ barbeiro.id }}">
                             {{ barbeiro.nome }} - {{ barbeiro.especialidade }}
                         </option>
                         {% endfor %}
                     </select>
                 </div>
 
-
+                <!-- SERVIÇO -->
                 <div class="input-group">
-                    <label for="servico">Serviço</label>
+                    <label>Serviço</label>
                     <select name="servico" required>
                         <option value="">Selecione</option>
-                        <option value="Corte Clássico">Corte Clássico</option>
-                        <option value="Barba Tradicional">Barba Tradicional</option>
-                        <option value="Corte + Barba">Corte + Barba</option>
-                        <option value="Tratamento Premium">Tratamento Premium</option>
+                        {% for servico in servicos %}
+                        <option value="{{ servico.id }}">
+                            {{ servico.nome }} - R$ {{ servico.preco }}
+                        </option>
+                        {% endfor %}
                     </select>
                 </div>
 
-
+                <!-- DATA -->
                 <div class="input-group">
-                    <label for="data">Data</label>
-                    <input type="date" name="data" required value="{{ request.form.get('data', '') }}">
+                    <label>Data</label>
+                    <input type="date" name="data" required>
                 </div>
 
+                <!-- HORÁRIO -->
+                <div class="input-group">
+                    <label>Horário</label>
+                    <input type="time" name="horario" required>
+                </div>
 
-                <button type="submit" name="acao" value="buscar" class="btn-buscar">
-                    Ver Horários Disponíveis
+                <button type="submit" class="btn-agendar">
+                    Confirmar Agendamento
                 </button>
-
-
-                {% if horarios is defined %}
-
-                <div class="horarios-disponiveis">
-                    <h3>Horários Disponíveis</h3>
-
-                    {% if horarios %}
-                    <div class="grade-horarios">
-                        {% for horario in horarios %}
-                        <button type="submit" name="horario" value="{{ horario }}" class="btn-horario">
-                            {{ horario }}
-                        </button>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="sem-horario">
-                        Nenhum horário disponível nesta data.
-                    </p>
-                    {% endif %}
-
-                </div>
-
-                {% endif %}
 
             </form>
 
