@@ -113,19 +113,28 @@ def agendamento():
         servico_id = request.form.get("servico")
         data = request.form.get("data")
         horario = request.form.get("horario")
+        forma_pagamento = request.form.get("forma_pagamento")
 
         # Validação
-        if not all([barbeiro_id, servico_id, data, horario]):
+        if not all([barbeiro_id, servico_id, data, horario, forma_pagamento]):
             flash("Preencha todos os campos.")
             return redirect(url_for("agendamento"))
 
         try:
+            # Define status automático
+            if forma_pagamento == "Pix":
+                status_pagamento = "Pago"
+            else:
+                status_pagamento = "Pendente"
+
             novo_agendamento = Agendamento(
                 cliente_id=current_user.id,
                 barbeiro_id=int(barbeiro_id),
                 servico_id=int(servico_id),
                 data=datetime.strptime(data, "%Y-%m-%d").date(),
                 horario=datetime.strptime(horario, "%H:%M").time(),
+                forma_pagamento=forma_pagamento,
+                status_pagamento=status_pagamento
             )
 
             db.session.add(novo_agendamento)
@@ -138,20 +147,50 @@ def agendamento():
             db.session.rollback()
             flash("Esse horário já está ocupado!")
 
+    # 🔹 Lista os agendamentos do usuário
+    agendamentos = (
+        Agendamento.query
+        .filter_by(cliente_id=current_user.id)
+        .order_by(Agendamento.data.desc())
+        .all()
+    )
+
     return render_template(
         "agendamento.html",
         barbeiros=barbeiros,
         servicos=servicos,
+        agendamentos=agendamentos
+    )
+
+
+# ---------------- MEUS AGENDAMENTOS ----------------
+@app.route("/meus-agendamentos")
+@login_required
+def meus_agendamentos():
+
+    agendamentos = (
+        Agendamento.query
+        .filter_by(cliente_id=current_user.id)
+        .order_by(Agendamento.data.desc())
+        .all()
+    )
+
+    return render_template(
+        "meus_agendamentos.html",
+        agendamentos=agendamentos
     )
 
 
 # ---------------- LOGOUT ----------------
-@app.route("/logout")
+from flask import flash
+
+@app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash("Logout realizado com sucesso.")
-    return redirect(url_for("login"))
+    flash('Você saiu da sua conta com sucesso!')
+    return redirect(url_for('index'))
+
 
 
 # ==========================================

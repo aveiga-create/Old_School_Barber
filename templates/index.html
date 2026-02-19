@@ -3,123 +3,182 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Barbearia Style</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old School Barber</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
 
-    <!-- NAVBAR -->
-    <nav>
-        <h1>💈 Barbearia Style</h1>
+    <!-- ================= HEADER ================= -->
+    <header class="header">
 
-        <div>
-            {% if session.get("usuario_id") %}
-            <span>Olá, {{ session.get("usuario_nome") }}</span>
-            <a href="{{ url_for('logout') }}">Sair</a>
+        <div class="container header-container">
+
+            <!-- LOGO -->
+            <div class="logo">
+                <h1>Old School <span>Barber</span></h1>
+            </div>
+
+            <!-- NAV -->
+            <nav class="nav">
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('index') }}">Página Inicial</a></li>
+                    <li><a href="#sobre">Sobre Nós</a></li>
+                    <li><a href="#servicos">Serviços</a></li>
+                    <li><a href="#barbeiros">Barbeiros</a></li>
+
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-btn">
+                        <a href="{{ url_for('agendamento') }}" class="btn-outline">Agendar</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('logout') }}">Sair</a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-btn">
+                        <a href="{{ url_for('cadastro') }}" class="btn-outline">Cadastro</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+        </div>
+
+    </header>
+
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+
+        <div class="hero-overlay"></div>
+
+        <div class="container hero-content">
+            <h2>Tradição & Excelência</h2>
+            <p>Desde 1998 elevando o padrão da barbearia clássica</p>
+
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('agendamento') }}" class="btn-primary">
+                Agendar Horário
+            </a>
             {% else %}
-            <a href="{{ url_for('login') }}">Login</a>
-            <a href="{{ url_for('cadastro') }}">Cadastro</a>
+            <a href="{{ url_for('login') }}" class="btn-primary">
+                Entrar para Agendar
+            </a>
             {% endif %}
         </div>
-    </nav>
 
-    <!-- MENSAGENS -->
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-        {% for message in messages %}
-        <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
-
-    <!-- BOTÕES PRINCIPAIS -->
-    <section>
-        <button onclick="mostrarBarbeiros()">Barbeiros</button>
     </section>
 
-    <!-- ÁREA DOS BARBEIROS (COMEÇA ESCONDIDA) -->
-    <section id="areaBarbeiros" style="display: none; margin-top:20px;">
+    <!-- ================= SOBRE ================= -->
+    <section id="sobre" class="section">
 
-        <h2>Nossos Barbeiros</h2>
+        <div class="container">
 
-        <div>
-            <div>
-                <img src="{{ url_for('static', filename='barbeiro1.jpg') }}" width="150">
-                <h3>João</h3>
-                <p>Especialista em Degradê e Navalhado</p>
+            <div class="section-header">
+                <h2>Sobre Nós</h2>
+                <div class="divider"></div>
             </div>
 
-            <div>
-                <img src="{{ url_for('static', filename='barbeiro2.jpg') }}" width="150">
-                <h3>Carlos</h3>
-                <p>Especialista em Barba e Corte Social</p>
+            <div class="section-content">
+                <p>
+                    Há mais de 20 anos, a Old School Barber oferece cortes clássicos
+                    e serviços de barbearia com tradição, técnica refinada e
+                    atendimento personalizado.
+                </p>
             </div>
 
-            <div>
-                <img src="{{ url_for('static', filename='barbeiro3.jpg') }}" width="150">
-                <h3>Rafael</h3>
-                <p>Especialista em Corte Infantil e Freestyle</p>
-            </div>
         </div>
 
-        <hr>
+    </section>
 
-        <!-- FORMULÁRIO DE AGENDAMENTO -->
-        <h2>Agendar Horário</h2>
+    <!-- ================= SERVIÇOS ================= -->
+    <section id="servicos" class="section dark">
 
-        <a href="{{ url_for('agendamento') }}">
-            <button>Agendar Horário</button>
-        </a>
+        <div class="container">
 
+            <div class="section-header">
+                <h2>Nossos Serviços</h2>
+                <div class="divider"></div>
+            </div>
 
-        <label>Escolha o Barbeiro:</label>
-        <select name="barbeiro" required>
-            <option value="João">João</option>
-            <option value="Carlos">Carlos</option>
-            <option value="Rafael">Rafael</option>
-        </select>
+            <div class="cards-grid">
 
-        <br><br>
+                <div class="service-card">
+                    <h3>Corte Clássico</h3>
+                    <p>Corte tradicional com acabamento premium.</p>
+                    <span class="price">R$ 35</span>
+                </div>
 
-        <label>Serviço:</label>
-        <select name="servico" required>
-            <option value="Corte">Corte</option>
-            <option value="Barba">Barba</option>
-            <option value="Corte + Barba">Corte + Barba</option>
-        </select>
+                <div class="service-card">
+                    <h3>Barba Tradicional</h3>
+                    <p>Modelagem completa com toalha quente.</p>
+                    <span class="price">R$ 25</span>
+                </div>
 
-        <br><br>
+                <div class="service-card">
+                    <h3>Corte + Barba</h3>
+                    <p>Combo completo com acabamento refinado.</p>
+                    <span class="price">R$ 55</span>
+                </div>
 
-        <label>Data:</label>
-        <input type="date" name="data" required>
+                <div class="service-card">
+                    <h3>Tratamento Premium</h3>
+                    <p>Hidratação e cuidados especiais.</p>
+                    <span class="price">R$ 70</span>
+                </div>
 
-        <br><br>
+            </div>
 
-        <label>Hora:</label>
-        <input type="time" name="hora" required>
-
-        <br><br>
-
-        <button type="submit">Agendar</button>
-        </form>
+        </div>
 
     </section>
 
-    <!-- SCRIPT -->
-    <script>
-        function mostrarBarbeiros() {
-            var area = document.getElementById("areaBarbeiros");
+    <!-- ================= BARBEIROS ================= -->
+    <section id="barbeiros" class="section">
 
-            if (area.style.display === "none") {
-                area.style.display = "block";
-            } else {
-                area.style.display = "none";
-            }
-        }
-    </script>
+        <div class="container">
+
+            <div class="section-header">
+                <h2>Nossos Barbeiros</h2>
+                <div class="divider"></div>
+            </div>
+
+            <div class="cards-grid">
+
+                {% for barbeiro in barbeiros %}
+                <div class="barber-card">
+
+                    {% if barbeiro.foto %}
+                    <div class="barber-img">
+                        <img src="{{ url_for('static', filename='imagens/' + barbeiro.foto) }}"
+                            alt="{{ barbeiro.nome }}">
+                    </div>
+                    {% endif %}
+
+                    <div class="barber-info">
+                        <h3>{{ barbeiro.nome }}</h3>
+                        <p>{{ barbeiro.especialidade }}</p>
+                    </div>
+
+                </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2026 Old School Barber • Todos os direitos reservados</p>
+        </div>
+    </footer>
 
 </body>
 

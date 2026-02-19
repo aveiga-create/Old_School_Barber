@@ -14,7 +14,7 @@
         <div class="agendamento-container">
 
             <h2>Agende seu Horário</h2>
-            <p>Escolha o barbeiro, serviço, data e horário.</p>
+            <p>Escolha o barbeiro, serviço, data, horário e forma de pagamento.</p>
 
             <!-- MENSAGENS -->
             {% with messages = get_flashed_messages() %}
@@ -67,11 +67,52 @@
                     <input type="time" name="horario" required>
                 </div>
 
+                <!-- FORMA DE PAGAMENTO -->
+                <div class="input-group">
+                    <label>Forma de Pagamento</label>
+                    <select name="forma_pagamento" required>
+                        <option value="">Selecione</option>
+                        <option value="Cartão">Cartão</option>
+                        <option value="Pix">Pix</option>
+                        <option value="Presencial">Pagamento Presencial</option>
+                    </select>
+                </div>
+
                 <button type="submit" class="btn-agendar">
                     Confirmar Agendamento
                 </button>
 
             </form>
+
+            <hr>
+
+            <!-- LISTA DE AGENDAMENTOS -->
+            <h3>Meus Agendamentos</h3>
+
+            {% if agendamentos %}
+            <div class="lista-agendamentos">
+                {% for ag in agendamentos %}
+                <div class="card-agendamento">
+                    <p><strong>Barbeiro:</strong> {{ ag.barbeiro.nome }}</p>
+                    <p><strong>Serviço:</strong> {{ ag.servico.nome }}</p>
+                    <p><strong>Data:</strong> {{ ag.data }}</p>
+                    <p><strong>Horário:</strong> {{ ag.horario }}</p>
+                    <p><strong>Forma de Pagamento:</strong> {{ ag.forma_pagamento }}</p>
+
+                    <p>
+                        <strong>Status Pagamento:</strong>
+                        {% if ag.status_pagamento == 'Pago' %}
+                        <span class="status-pago">Pago</span>
+                        {% else %}
+                        <span class="status-pendente">Pendente</span>
+                        {% endif %}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>Você ainda não possui agendamentos.</p>
+            {% endif %}
 
             <p class="voltar">
                 <a href="{{ url_for('index') }}">Voltar ao início</a>
