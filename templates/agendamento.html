@@ -14,9 +14,7 @@
         <div class="agendamento-container">
 
             <h2>Agende seu Horário</h2>
-            <p>Escolha o barbeiro, serviço, data, horário e forma de pagamento.</p>
 
-            <!-- MENSAGENS -->
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div class="flash-messages">
@@ -27,16 +25,16 @@
             {% endif %}
             {% endwith %}
 
-            <form action="{{ url_for('agendamento') }}" method="POST">
+            <form action="{{ url_for('agendamento') }}" method="POST" id="formAgendamento">
 
                 <!-- BARBEIRO -->
                 <div class="input-group">
                     <label>Barbeiro</label>
-                    <select name="barbeiro" required>
+                    <select name="barbeiro" id="barbeiro" required>
                         <option value="">Selecione</option>
                         {% for barbeiro in barbeiros %}
                         <option value="{{ barbeiro.id }}">
-                            {{ barbeiro.nome }} - {{ barbeiro.especialidade }}
+                            {{ barbeiro.nome }}
                         </option>
                         {% endfor %}
                     </select>
@@ -58,23 +56,24 @@
                 <!-- DATA -->
                 <div class="input-group">
                     <label>Data</label>
-                    <input type="date" name="data" required>
+                    <input type="date" name="data" id="data" required>
                 </div>
 
-                <!-- HORÁRIO -->
+                <!-- HORÁRIOS -->
                 <div class="input-group">
-                    <label>Horário</label>
-                    <input type="time" name="horario" required>
+                    <label>Horários disponíveis</label>
+                    <div class="horarios-grid" id="horarios"></div>
+                    <input type="hidden" name="horario" id="horarioSelecionado" required>
                 </div>
 
-                <!-- FORMA DE PAGAMENTO -->
+                <!-- PAGAMENTO -->
                 <div class="input-group">
                     <label>Forma de Pagamento</label>
                     <select name="forma_pagamento" required>
                         <option value="">Selecione</option>
                         <option value="Cartão">Cartão</option>
                         <option value="Pix">Pix</option>
-                        <option value="Presencial">Pagamento Presencial</option>
+                        <option value="Presencial">Presencial</option>
                     </select>
                 </div>
 
@@ -86,40 +85,131 @@
 
             <hr>
 
-            <!-- LISTA DE AGENDAMENTOS -->
             <h3>Meus Agendamentos</h3>
 
             {% if agendamentos %}
-            <div class="lista-agendamentos">
-                {% for ag in agendamentos %}
-                <div class="card-agendamento">
-                    <p><strong>Barbeiro:</strong> {{ ag.barbeiro.nome }}</p>
-                    <p><strong>Serviço:</strong> {{ ag.servico.nome }}</p>
-                    <p><strong>Data:</strong> {{ ag.data }}</p>
-                    <p><strong>Horário:</strong> {{ ag.horario }}</p>
-                    <p><strong>Forma de Pagamento:</strong> {{ ag.forma_pagamento }}</p>
-
-                    <p>
-                        <strong>Status Pagamento:</strong>
-                        {% if ag.status_pagamento == 'Pago' %}
-                        <span class="status-pago">Pago</span>
-                        {% else %}
-                        <span class="status-pendente">Pendente</span>
-                        {% endif %}
-                    </p>
-                </div>
-                {% endfor %}
+            {% for ag in agendamentos %}
+            <div class="card-agendamento">
+                <p>{{ ag.data.strftime('%d/%m/%Y') }} - {{ ag.horario.strftime('%H:%M') }}</p>
             </div>
+            {% endfor %}
             {% else %}
-            <p>Você ainda não possui agendamentos.</p>
+            <p>Sem agendamentos.</p>
             {% endif %}
-
-            <p class="voltar">
-                <a href="{{ url_for('index') }}">Voltar ao início</a>
-            </p>
 
         </div>
     </section>
+
+    <!-- ================= JS ================= -->
+    <script>
+        const horariosContainer = document.getElementById("horarios");
+        const inputHorario = document.getElementById("horarioSelecionado");
+        const inputData = document.getElementById("data");
+        const selectBarbeiro = document.getElementById("barbeiro");
+        const form = document.getElementById("formAgendamento");
+
+        let horariosOcupados = [];
+
+        // 🔒 bloqueia datas passadas
+        const hoje = new Date().toISOString().split("T")[0];
+        inputData.min = hoje;
+        inputData.value = hoje;
+
+        function gerarHorarios() {
+            const horarios = [];
+
+            function adicionar(inicio, fim) {
+                let [h, m] = inicio.split(":").map(Number);
+                const [hf, mf] = fim.split(":").map(Number);
+
+                while (h < hf || (h === hf && m <= mf)) {
+                    horarios.push(
+                        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+                    );
+                    m += 30;
+                    if (m >= 60) {
+                        m = 0;
+                        h++;
+                    }
+                }
+            }
+
+            adicionar("08:30", "12:00");
+            adicionar("13:30", "21:00");
+
+            return horarios;
+        }
+
+        function renderHorarios() {
+            const horarios = gerarHorarios();
+            horariosContainer.innerHTML = "";
+
+            horarios.forEach(h => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.innerText = h;
+                btn.classList.add("horario-btn");
+
+                if (horariosOcupados.includes(h)) {
+                    btn.classList.add("ocupado");
+                    btn.disabled = true;
+                } else {
+                    btn.classList.add("livre");
+
+                    btn.onclick = () => {
+                        document.querySelectorAll(".horario-btn")
+                            .forEach(b => b.classList.remove("selecionado"));
+
+                        btn.classList.add("selecionado");
+                        inputHorario.value = h;
+                    };
+                }
+
+                horariosContainer.appendChild(btn);
+            });
+        }
+
+        // 🚀 AJAX PARA BUSCAR HORÁRIOS
+        function carregarHorarios() {
+            const barbeiroId = selectBarbeiro.value;
+            const data = inputData.value;
+
+            if (!barbeiroId || !data) return;
+
+            fetch(`/horarios-ocupados?barbeiro_id=${barbeiroId}&data=${data}`)
+                .then(res => res.json())
+                .then(data => {
+                    horariosOcupados = data;
+                    inputHorario.value = ""; // limpa seleção
+                    renderHorarios();
+                });
+        }
+
+        // 🔄 atualiza ao mudar
+        selectBarbeiro.addEventListener("change", carregarHorarios);
+        inputData.addEventListener("change", carregarHorarios);
+
+        // 🔒 valida envio
+        form.addEventListener("submit", function (e) {
+            if (!inputHorario.value) {
+                e.preventDefault();
+                alert("Selecione um horário!");
+            }
+        });
+
+        renderHorarios();
+    </script>
+
+    // 🔥 impede envio sem horário  
+    form.addEventListener("submit", function (e) {
+    if (!inputHorario.value) {
+    e.preventDefault();
+    alert("Selecione um horário!");
+    }
+    });
+
+    renderHorarios();
+    </script>
 
 </body>
 

@@ -38,10 +38,10 @@
                     </li>
                     {% else %}
                     <li>
-                        <a href="{{ url_for('login') }}">Login</a>
+                        <a href="#" onclick="abrirModalLogin()">Login</a>
                     </li>
                     <li class="nav-btn">
-                        <a href="{{ url_for('cadastro') }}" class="btn-outline">Cadastro</a>
+                        <a href="#" onclick="abrirModalCadastro()" class="btn-outline">Cadastro</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -65,7 +65,7 @@
                 Agendar Horário
             </a>
             {% else %}
-            <a href="{{ url_for('login') }}" class="btn-primary">
+            <a href="#" onclick="abrirModalLogin()" class="btn-primary">
                 Entrar para Agendar
             </a>
             {% endif %}
@@ -75,14 +75,11 @@
 
     <!-- ================= SOBRE ================= -->
     <section id="sobre" class="section">
-
         <div class="container">
-
             <div class="section-header">
                 <h2>Sobre Nós</h2>
                 <div class="divider"></div>
             </div>
-
             <div class="section-content">
                 <p>
                     Há mais de 20 anos, a Old School Barber oferece cortes clássicos
@@ -90,23 +87,18 @@
                     atendimento personalizado.
                 </p>
             </div>
-
         </div>
-
     </section>
 
     <!-- ================= SERVIÇOS ================= -->
     <section id="servicos" class="section dark">
-
         <div class="container">
-
             <div class="section-header">
                 <h2>Nossos Serviços</h2>
                 <div class="divider"></div>
             </div>
 
             <div class="cards-grid">
-
                 <div class="service-card">
                     <h3>Corte Clássico</h3>
                     <p>Corte tradicional com acabamento premium.</p>
@@ -130,25 +122,19 @@
                     <p>Hidratação e cuidados especiais.</p>
                     <span class="price">R$ 70</span>
                 </div>
-
             </div>
-
         </div>
-
     </section>
 
     <!-- ================= BARBEIROS ================= -->
     <section id="barbeiros" class="section">
-
         <div class="container">
-
             <div class="section-header">
                 <h2>Nossos Barbeiros</h2>
                 <div class="divider"></div>
             </div>
 
             <div class="cards-grid">
-
                 {% for barbeiro in barbeiros %}
                 <div class="barber-card">
 
@@ -166,11 +152,8 @@
 
                 </div>
                 {% endfor %}
-
             </div>
-
         </div>
-
     </section>
 
     <!-- ================= FOOTER ================= -->
@@ -179,6 +162,96 @@
             <p>© 2026 Old School Barber • Todos os direitos reservados</p>
         </div>
     </footer>
+
+    <!-- ================= MODAL LOGIN ================= -->
+    <div id="modal-login" class="modal">
+        <div class="modal-content">
+            <span onclick="fecharModal()" class="close">&times;</span>
+            <h2>Login</h2>
+
+            <form id="form-login">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="senha" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+                <p id="login-erro" class="erro"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL CADASTRO ================= -->
+    <div id="modal-cadastro" class="modal">
+        <div class="modal-content">
+            <span onclick="fecharModal()" class="close">&times;</span>
+            <h2>Cadastro</h2>
+
+            <form id="form-cadastro">
+                <input type="text" name="nome" placeholder="Nome" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="senha" placeholder="Senha" required>
+                <button type="submit">Cadastrar</button>
+                <p id="cadastro-erro" class="erro"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= JS ================= -->
+    <script>
+        function abrirModalLogin() {
+            document.getElementById("modal-login").style.display = "flex";
+        }
+
+        function abrirModalCadastro() {
+            document.getElementById("modal-cadastro").style.display = "flex";
+        }
+
+        function fecharModal() {
+            document.getElementById("modal-login").style.display = "none";
+            document.getElementById("modal-cadastro").style.display = "none";
+        }
+
+        // LOGIN AJAX
+        document.getElementById("form-login").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            const response = await fetch("/login", {
+                method: "POST",
+                body: formData,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                location.reload();
+            } else {
+                document.getElementById("login-erro").innerText = data.message;
+            }
+        });
+
+        // CADASTRO AJAX
+        document.getElementById("form-cadastro").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            const response = await fetch("/cadastro", {
+                method: "POST",
+                body: formData,
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Cadastro realizado com sucesso!");
+                fecharModal();
+            } else {
+                document.getElementById("cadastro-erro").innerText = data.message;
+            }
+        });
+    </script>
 
 </body>
 
