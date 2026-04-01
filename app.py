@@ -3,7 +3,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Config
 from models import db, Usuario, Barbeiro, Servico, Agendamento
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
@@ -15,6 +15,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Você precisa estar logado para acessar essa página."
+
+
+# ==========================================
+# FERIADOS
+# ==========================================
+FERIADOS = [
+    "2026-01-01",
+    "2026-12-25",
+]
 
 
 # ==========================================
@@ -33,6 +42,9 @@ def load_user(user_id):
 def index():
     barbeiros = Barbeiro.query.filter_by(ativo=True).all()
     return render_template("index.html", barbeiros=barbeiros)
+
+
+# ---------------- HORÁRIOS OCUPADOS ----------------
 @app.route("/horarios-ocupados")
 @login_required
 def horarios_ocupados():
@@ -130,16 +142,6 @@ def cadastro():
     return render_template("cadastro.html")
 
 
-# ---------------- ESQUECI SENHA ----------------
-@app.route("/esqueci-senha", methods=["GET", "POST"])
-def esqueci_senha():
-    if request.method == "POST":
-        flash("Função de recuperação ainda não implementada.")
-        return redirect(url_for("login"))
-
-    return render_template("esqueci_senha.html")
-
-
 # ---------------- AGENDAMENTO ----------------
 @app.route("/agendamento", methods=["GET", "POST"])
 @login_required
@@ -155,12 +157,10 @@ def agendamento():
         horario = request.form.get("horario")
         forma_pagamento = request.form.get("forma_pagamento")
 
-        # Validação básica
         if not all([barbeiro_id, servico_id, data, horario, forma_pagamento]):
             flash("Preencha todos os campos.")
             return redirect(url_for("agendamento"))
 
-        # Validação de data/hora
         try:
             data_obj = datetime.strptime(data, "%Y-%m-%d").date()
             horario_obj = datetime.strptime(horario, "%H:%M").time()
@@ -168,12 +168,19 @@ def agendamento():
             flash("Data ou horário inválido.")
             return redirect(url_for("agendamento"))
 
-        # 🔒 BLOQUEIO DE DATAS PASSADAS
+        # 🔒 BLOQUEIOS
         if data_obj < date.today():
             flash("Não é possível agendar em datas passadas.")
             return redirect(url_for("agendamento"))
 
-        # 🔒 Verifica se horário já existe
+        if data_obj.weekday() == 6:
+            flash("Não atendemos aos domingos.")
+            return redirect(url_for("agendamento"))
+
+        if data in FERIADOS:
+            flash("Não atendemos em feriados.")
+            return redirect(url_for("agendamento"))
+
         existe = Agendamento.query.filter_by(
             barbeiro_id=int(barbeiro_id),
             data=data_obj,
@@ -184,7 +191,6 @@ def agendamento():
             flash("Esse horário já está ocupado!")
             return redirect(url_for("agendamento"))
 
-        # Define status pagamento
         status_pagamento = "Pago" if forma_pagamento == "Pix" else "Pendente"
 
         novo_agendamento = Agendamento(
@@ -203,17 +209,25 @@ def agendamento():
             flash("Agendamento realizado com sucesso!")
         except IntegrityError:
             db.session.rollback()
-            flash("Erro ao salvar agendamento. Tente novamente.")
+            flash("Erro ao salvar agendamento.")
 
         return redirect(url_for("agendamento"))
 
-    # Lista agendamentos do usuário
+    # 🔥 FILTRO DE AGENDAMENTOS (remove após 1h)
+    agora = datetime.now()
+
     agendamentos = (
         Agendamento.query
-        .filter_by(cliente_id=current_user.id)
-        .order_by(Agendamento.data.desc())
+        .filter(Agendamento.cliente_id == current_user.id)
         .all()
     )
+
+    agendamentos = [
+        ag for ag in agendamentos
+        if datetime.combine(ag.data, ag.horario) + timedelta(hours=1) > agora
+    ]
+
+    agendamentos.sort(key=lambda x: (x.data, x.horario))
 
     return render_template(
         "agendamento.html",
@@ -223,22 +237,28 @@ def agendamento():
     )
 
 
-# ---------------- MEUS AGENDAMENTOS ----------------
-@app.route("/meus-agendamentos")
+# ---------------- CANCELAR AGENDAMENTO ----------------
+@app.route("/cancelar-agendamento/<int:id>", methods=["POST"])
 @login_required
-def meus_agendamentos():
+def cancelar_agendamento(id):
+    agendamento = Agendamento.query.get_or_404(id)
 
-    agendamentos = (
-        Agendamento.query
-        .filter_by(cliente_id=current_user.id)
-        .order_by(Agendamento.data.desc())
-        .all()
+    if agendamento.cliente_id != current_user.id:
+        return "Não autorizado", 403
+
+    agora = datetime.now()
+    data_hora_agendamento = datetime.combine(
+        agendamento.data,
+        agendamento.horario
     )
 
-    return render_template(
-        "meus_agendamentos.html",
-        agendamentos=agendamentos
-    )
+    if data_hora_agendamento - agora < timedelta(hours=3):
+        return jsonify({"erro": "Só pode cancelar com 3h de antecedência"}), 400
+
+    db.session.delete(agendamento)
+    db.session.commit()
+
+    return jsonify({"success": True})
 
 
 # ---------------- LOGOUT ----------------
@@ -251,7 +271,7 @@ def logout():
 
 
 # ==========================================
-# CRIAR BANCO
+# START
 # ==========================================
 if __name__ == "__main__":
     with app.app_context():

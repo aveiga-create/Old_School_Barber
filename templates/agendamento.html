@@ -15,6 +15,11 @@
 
             <h2>Agende seu Horário</h2>
 
+            <!-- BOTÃO VOLTAR -->
+            <a href="{{ url_for('index') }}" class="btn-agendar" style="margin-bottom:15px; display:inline-block;">
+                ← Voltar para Página Inicial
+            </a>
+
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div class="flash-messages">
@@ -90,7 +95,17 @@
             {% if agendamentos %}
             {% for ag in agendamentos %}
             <div class="card-agendamento">
-                <p>{{ ag.data.strftime('%d/%m/%Y') }} - {{ ag.horario.strftime('%H:%M') }}</p>
+                <p>
+                    {{ ag.data.strftime('%d/%m/%Y') }} -
+                    {{ ag.horario.strftime('%H:%M') }} -
+                    {{ ag.barbeiro.nome }} -
+                    {{ ag.servico.nome }}
+                </p>
+
+                <button onclick="cancelarAgendamento({{ ag.id }}, '{{ ag.data }}', '{{ ag.horario }}')"
+                    class="btn-agendar" style="margin-top:10px;">
+                    Cancelar
+                </button>
             </div>
             {% endfor %}
             {% else %}
@@ -110,10 +125,30 @@
 
         let horariosOcupados = [];
 
-        // 🔒 bloqueia datas passadas
         const hoje = new Date().toISOString().split("T")[0];
         inputData.min = hoje;
-        inputData.value = hoje;
+
+        // 🔒 BLOQUEIA DOMINGOS E FERIADOS
+        inputData.addEventListener("input", () => {
+            if (!inputData.value) return;
+
+            const dataSelecionada = new Date(inputData.value + "T00:00:00");
+
+            if (dataSelecionada.getDay() === 0) {
+                alert("Não atendemos aos domingos!");
+                inputData.value = "";
+                horariosContainer.innerHTML = "";
+                return;
+            }
+
+            const feriados = ["2026-01-01", "2026-12-25"];
+
+            if (feriados.includes(inputData.value)) {
+                alert("Não atendemos em feriados!");
+                inputData.value = "";
+                horariosContainer.innerHTML = "";
+            }
+        });
 
         function gerarHorarios() {
             const horarios = [];
@@ -144,52 +179,60 @@
             const horarios = gerarHorarios();
             horariosContainer.innerHTML = "";
 
+            const agora = new Date();
+
             horarios.forEach(h => {
+                const [hora, minuto] = h.split(":");
+                const dataHora = new Date(`${inputData.value}T${hora}:${minuto}:00`);
+
+                // 🔒 remove horários passados (HOJE)
+                if (inputData.value === hoje && dataHora <= agora) return;
+
+                // 🔒 remove horários ocupados
+                if (horariosOcupados.includes(h)) return;
+
                 const btn = document.createElement("button");
                 btn.type = "button";
                 btn.innerText = h;
-                btn.classList.add("horario-btn");
+                btn.classList.add("horario-btn", "livre");
 
-                if (horariosOcupados.includes(h)) {
-                    btn.classList.add("ocupado");
-                    btn.disabled = true;
-                } else {
-                    btn.classList.add("livre");
+                btn.onclick = () => {
+                    document.querySelectorAll(".horario-btn")
+                        .forEach(b => b.classList.remove("selecionado"));
 
-                    btn.onclick = () => {
-                        document.querySelectorAll(".horario-btn")
-                            .forEach(b => b.classList.remove("selecionado"));
-
-                        btn.classList.add("selecionado");
-                        inputHorario.value = h;
-                    };
-                }
+                    btn.classList.add("selecionado");
+                    inputHorario.value = h;
+                };
 
                 horariosContainer.appendChild(btn);
             });
+
+            if (horariosContainer.innerHTML === "") {
+                horariosContainer.innerHTML = "<p>Sem horários disponíveis</p>";
+            }
         }
 
-        // 🚀 AJAX PARA BUSCAR HORÁRIOS
         function carregarHorarios() {
             const barbeiroId = selectBarbeiro.value;
             const data = inputData.value;
 
-            if (!barbeiroId || !data) return;
+            if (!barbeiroId || !data) {
+                horariosContainer.innerHTML = "<p>Selecione barbeiro e data</p>";
+                return;
+            }
 
             fetch(`/horarios-ocupados?barbeiro_id=${barbeiroId}&data=${data}`)
                 .then(res => res.json())
                 .then(data => {
                     horariosOcupados = data;
-                    inputHorario.value = ""; // limpa seleção
+                    inputHorario.value = "";
                     renderHorarios();
                 });
         }
 
-        // 🔄 atualiza ao mudar
         selectBarbeiro.addEventListener("change", carregarHorarios);
         inputData.addEventListener("change", carregarHorarios);
 
-        // 🔒 valida envio
         form.addEventListener("submit", function (e) {
             if (!inputHorario.value) {
                 e.preventDefault();
@@ -197,18 +240,31 @@
             }
         });
 
-        renderHorarios();
-    </script>
+        function cancelarAgendamento(id, data, horario) {
+            const agora = new Date();
+            const dataHoraAgendamento = new Date(`${data}T${horario}`);
+            const diffHoras = (dataHoraAgendamento - agora) / (1000 * 60 * 60);
 
-    // 🔥 impede envio sem horário  
-    form.addEventListener("submit", function (e) {
-    if (!inputHorario.value) {
-    e.preventDefault();
-    alert("Selecione um horário!");
-    }
-    });
+            if (diffHoras < 3) {
+                alert("Só é possível cancelar com no mínimo 3 horas de antecedência!");
+                return;
+            }
 
-    renderHorarios();
+            if (!confirm("Deseja realmente cancelar este agendamento?")) return;
+
+            fetch(`/cancelar-agendamento/${id}`, {
+                method: "POST"
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.erro) {
+                        alert(res.erro);
+                    } else {
+                        alert("Agendamento cancelado!");
+                        location.reload();
+                    }
+                });
+        }
     </script>
 
 </body>
