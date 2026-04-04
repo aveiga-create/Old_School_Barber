@@ -13,38 +13,31 @@ db.init_app(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+# 🔥 CORREÇÃO PRINCIPAL
 login_manager.login_view = "login"
 login_manager.login_message = "Você precisa estar logado para acessar essa página."
 
 
-# ==========================================
-# FERIADOS
-# ==========================================
 FERIADOS = [
     "2026-01-01",
     "2026-12-25",
 ]
 
 
-# ==========================================
-# LOGIN MANAGER
-# ==========================================
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(Usuario, int(user_id))
 
 
-# ==========================================
-# ROTAS
-# ==========================================
-
+# ================= INDEX =================
 @app.route("/")
 def index():
     barbeiros = Barbeiro.query.filter_by(ativo=True).all()
     return render_template("index.html", barbeiros=barbeiros)
 
 
-# ---------------- HORÁRIOS OCUPADOS ----------------
+# ================= HORÁRIOS =================
 @app.route("/horarios-ocupados")
 @login_required
 def horarios_ocupados():
@@ -64,85 +57,65 @@ def horarios_ocupados():
         data=data_obj
     ).all()
 
-    horarios = [
-        ag.horario.strftime("%H:%M") for ag in agendamentos
-    ]
+    horarios = [ag.horario.strftime("%H:%M") for ag in agendamentos]
 
     return jsonify(horarios)
 
 
-# ---------------- LOGIN ----------------
+# ================= LOGIN =================
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if request.method == "POST":
-        email = request.form.get("email", "").lower().strip()
-        senha = request.form.get("senha")
 
-        if not email or not senha:
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": False, "message": "Preencha todos os campos"})
-            flash("Preencha todos os campos.")
-            return redirect(url_for("login"))
+    # 🔥 IMPORTANTE: evitar erro 405 e permitir redirect do Flask-Login
+    if request.method == "GET":
+        return redirect(url_for("index"))
 
-        user = Usuario.query.filter_by(email=email).first()
+    email = request.form.get("email", "").lower().strip()
+    senha = request.form.get("senha")
 
-        if user and check_password_hash(user.senha, senha):
-            login_user(user)
+    if not email or not senha:
+        return jsonify({"success": False, "message": "Preencha todos os campos"})
 
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": True})
+    user = Usuario.query.filter_by(email=email).first()
 
-            flash("Login realizado com sucesso!")
-            return redirect(url_for("agendamento"))
+    if user and check_password_hash(user.senha, senha):
+        login_user(user)
+        return jsonify({"success": True})
 
-        else:
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": False, "message": "Email ou senha inválidos"})
-
-            flash("Email ou senha inválidos.")
-
-    return render_template("login.html")
+    return jsonify({"success": False, "message": "Email ou senha inválidos"})
 
 
-# ---------------- CADASTRO ----------------
+# ================= CADASTRO =================
 @app.route("/cadastro", methods=["GET", "POST"])
 def cadastro():
-    if request.method == "POST":
-        nome = request.form.get("nome")
-        email = request.form.get("email", "").lower().strip()
-        senha = request.form.get("senha")
 
-        if not nome or not email or not senha:
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": False, "message": "Preencha todos os campos"})
-            flash("Preencha todos os campos.")
-            return redirect(url_for("cadastro"))
+    # 🔥 MESMA CORREÇÃO AQUI
+    if request.method == "GET":
+        return redirect(url_for("index"))
 
-        if Usuario.query.filter_by(email=email).first():
-            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-                return jsonify({"success": False, "message": "Email já cadastrado"})
-            flash("Email já cadastrado.")
-            return redirect(url_for("cadastro"))
+    nome = request.form.get("nome")
+    email = request.form.get("email", "").lower().strip()
+    senha = request.form.get("senha")
 
-        novo_usuario = Usuario(
-            nome=nome,
-            email=email,
-            senha=generate_password_hash(senha),
-        )
+    if not nome or not email or not senha:
+        return jsonify({"success": False, "message": "Preencha todos os campos"})
 
-        db.session.add(novo_usuario)
-        db.session.commit()
+    if Usuario.query.filter_by(email=email).first():
+        return jsonify({"success": False, "message": "Email já cadastrado"})
 
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return jsonify({"success": True})
+    novo_usuario = Usuario(
+        nome=nome,
+        email=email,
+        senha=generate_password_hash(senha),
+    )
 
-        flash("Cadastro realizado com sucesso!")
-        return redirect(url_for("login"))
+    db.session.add(novo_usuario)
+    db.session.commit()
 
-    return render_template("cadastro.html")
+    return jsonify({"success": True})
 
 
-# ---------------- AGENDAMENTO ----------------
+# ================= AGENDAMENTO =================
 @app.route("/agendamento", methods=["GET", "POST"])
 @login_required
 def agendamento():
@@ -168,7 +141,6 @@ def agendamento():
             flash("Data ou horário inválido.")
             return redirect(url_for("agendamento"))
 
-        # 🔒 BLOQUEIOS
         if data_obj < date.today():
             flash("Não é possível agendar em datas passadas.")
             return redirect(url_for("agendamento"))
@@ -213,7 +185,6 @@ def agendamento():
 
         return redirect(url_for("agendamento"))
 
-    # 🔥 FILTRO DE AGENDAMENTOS (remove após 1h)
     agora = datetime.now()
 
     agendamentos = (
@@ -237,14 +208,14 @@ def agendamento():
     )
 
 
-# ---------------- CANCELAR AGENDAMENTO ----------------
+# ================= CANCELAR =================
 @app.route("/cancelar-agendamento/<int:id>", methods=["POST"])
 @login_required
 def cancelar_agendamento(id):
     agendamento = Agendamento.query.get_or_404(id)
 
     if agendamento.cliente_id != current_user.id:
-        return "Não autorizado", 403
+        return jsonify({"erro": "Não autorizado"}), 403
 
     agora = datetime.now()
     data_hora_agendamento = datetime.combine(
@@ -261,7 +232,7 @@ def cancelar_agendamento(id):
     return jsonify({"success": True})
 
 
-# ---------------- LOGOUT ----------------
+# ================= LOGOUT =================
 @app.route('/logout')
 @login_required
 def logout():
@@ -270,9 +241,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-# ==========================================
-# START
-# ==========================================
+# ================= START =================
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
