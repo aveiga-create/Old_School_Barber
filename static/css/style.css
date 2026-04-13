@@ -1,4 +1,15 @@
-/* RESET BÁSICO */
+/* ================= VARIÁVEIS GLOBAIS ================= */
+:root {
+  --primary: #c5a047;
+  --primary-hover: #a8842f;
+  --bg-body: #1a1a1a;
+  --bg-darker: #111;
+  --bg-card: #2b2b2b;
+  --text-color: #f5f5dc;
+  --transition: 0.3s ease;
+}
+
+/* ================= RESET BÁSICO ================= */
 * {
   margin: 0;
   padding: 0;
@@ -7,25 +18,22 @@
 
 body {
   font-family: "Playfair Display", serif;
-  background-color: #1a1a1a;
-  color: #f5f5dc;
+  background-color: var(--bg-body);
+  color: var(--text-color);
   line-height: 1.6;
 }
 
-/* CONTAINER */
 .container {
   width: 90%;
   max-width: 1200px;
   margin: auto;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 header {
-  background-color: #111;
-  border-bottom: 2px solid #c5a047;
+  background-color: var(--bg-darker);
+  border-bottom: 2px solid var(--primary);
   padding: 20px 0;
-
-  /* 🔥 CORREÇÃO */
   position: relative;
   z-index: 10;
 }
@@ -38,7 +46,7 @@ header .container {
 
 .logo h1 {
   font-family: "Cinzel", serif;
-  color: #c5a047;
+  color: var(--primary);
   font-size: 28px;
   letter-spacing: 2px;
 }
@@ -47,27 +55,27 @@ nav ul {
   list-style: none;
   display: flex;
   gap: 30px;
+  align-items: center;
 }
 
 nav a {
   text-decoration: none;
-  color: #f5f5dc;
+  color: var(--text-color);
   font-weight: bold;
-  transition: 0.3s;
+  transition: var(--transition);
 }
 
 nav a:hover {
-  color: #c5a047;
+  color: var(--primary);
 }
 
-/* HERO */
+/* ================= HERO (PÁGINA INICIAL) ================= */
 .hero {
   background: url("../imagens/imagem_fundo.png") no-repeat center center/cover;
   height: 90vh;
   position: relative;
 }
 
-/* OVERLAY */
 .hero-overlay {
   background-color: rgba(0, 0, 0, 0.7);
   height: 100%;
@@ -76,9 +84,6 @@ nav a:hover {
   top: 0;
   left: 0;
   z-index: 1;
-
-  /* 🔥 CORREÇÃO MAIS IMPORTANTE */
-  pointer-events: none;
 }
 
 .hero-content {
@@ -92,63 +97,33 @@ nav a:hover {
 .hero-content h2 {
   font-family: "Cinzel", serif;
   font-size: 48px;
-  color: #c5a047;
-}
-
-.hero-content p {
-  font-size: 22px;
-  margin: 15px 0;
+  color: var(--primary);
 }
 
 .btn-primary {
   display: inline-block;
   padding: 12px 30px;
-  background-color: #c5a047;
-  color: #111;
+  background-color: var(--primary);
+  color: var(--bg-darker);
   text-decoration: none;
   font-weight: bold;
   border-radius: 5px;
-  transition: 0.3s;
+  transition: var(--transition);
 }
 
-.btn-primary:hover {
-  background-color: #a8842f;
-}
-
-/* SEÇÕES */
+/* ================= GRID DE SERVIÇOS E BARBEIROS ================= */
 .section {
   padding: 80px 0;
   text-align: center;
 }
 
-.section-header h2 {
-  font-family: "Cinzel", serif;
-  color: #c5a047;
-  font-size: 36px;
-  margin-bottom: 20px;
-}
-
-.divider {
-  width: 80px;
-  height: 3px;
-  background-color: #c5a047;
-  margin: 0 auto 40px auto;
-}
-
-.section-content p {
-  max-width: 700px;
-  margin: auto;
-  font-size: 18px;
-}
-
-/* GRID */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
 }
 
-/* ================= SERVIÇOS ================= */
+/* SERVIÇOS */
 .service-card {
   position: relative;
   height: 250px;
@@ -157,12 +132,9 @@ nav a:hover {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  color: #fff;
-  border: 1px solid #c5a047;
+  border: 1px solid var(--primary);
 }
 
-/* IMAGEM */
 .service-card::before {
   content: "";
   position: absolute;
@@ -171,24 +143,16 @@ nav a:hover {
   background-position: center;
   transition: 0.4s;
   z-index: 1;
-
-  /* 🔥 CORREÇÃO */
-  pointer-events: none;
 }
 
-/* OVERLAY */
 .service-card::after {
   content: "";
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
   z-index: 2;
-
-  /* 🔥 CORREÇÃO */
-  pointer-events: none;
 }
 
-/* TEXTO */
 .service-card h3,
 .service-card p,
 .service-card span {
@@ -196,147 +160,127 @@ nav a:hover {
   z-index: 3;
 }
 
-.service-card h3 {
-  font-size: 22px;
-  color: #c5a047;
-}
-
-.service-card p {
-  font-size: 14px;
-}
-
-.service-card span {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-/* HOVER */
-.service-card:hover::before {
-  transform: scale(1.1);
-}
-
-/* IMAGENS */
+/* Imagens dos Serviços */
 .service-card:nth-child(1)::before {
   background-image: url("../imagens/corte_classico.png");
 }
-
 .service-card:nth-child(2)::before {
   background-image: url("../imagens/barba.png");
 }
-
 .service-card:nth-child(3)::before {
   background-image: url("../imagens/corte_barba.png");
 }
-
 .service-card:nth-child(4)::before {
   background-image: url("../imagens/tratamento_premium.png");
 }
 
-/* ================= BARBEIROS ================= */
+/* BARBEIROS */
 .barber-card {
-  background-color: #2b2b2b;
-  border: 1px solid #c5a047;
+  background-color: var(--bg-card);
+  border: 1px solid var(--primary);
   border-radius: 10px;
   overflow: hidden;
-  transition: 0.3s;
-}
-
-.barber-card:hover {
-  transform: translateY(-10px);
+  transition: var(--transition);
 }
 
 .barber-img img {
   width: 100%;
   height: 250px;
   object-fit: cover;
-  object-position: top;
-  transition: 0.4s;
 }
 
-.barber-card:hover img {
-  transform: scale(1.05);
+/* ================= MEUS AGENDAMENTOS (AQUI ESTÁ A CORREÇÃO) ================= */
+.meus-agendamentos {
+  padding: 80px 0;
 }
 
-.barber-info {
-  padding: 15px;
-}
-
-.barber-info h3 {
-  color: #c5a047;
-}
-
-.barber-info p {
-  font-size: 14px;
-}
-
-/* FOOTER */
-footer {
-  background-color: #111;
+.meus-agendamentos h2 {
+  font-family: "Cinzel", serif;
+  color: var(--primary);
   text-align: center;
-  padding: 20px 0;
-  border-top: 2px solid #c5a047;
+  margin-bottom: 40px;
 }
 
-/* ================= MODAL ================= */
-.modal {
-  display: none;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  justify-content: center;
-  align-items: center;
-
-  /* 🔥 GARANTE QUE FIQUE NA FRENTE */
-  z-index: 9999;
+/* Grid para os cards de agendamento ficarem lado a lado */
+.agendamentos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
+.agendamento-card {
+  background-color: var(--bg-card);
+  border: 1px solid #333;
+  border-left: 5px solid var(--primary);
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: var(--transition);
+}
+
+.agendamento-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
+}
+
+.agendamento-info h3 {
+  color: var(--primary);
+  font-family: "Cinzel", serif;
+  margin-bottom: 10px;
+}
+
+.agendamento-status {
+  text-align: right;
+  margin-top: 15px;
+}
+
+.status.pago {
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+/* ================= CALENDÁRIO / MODAL ================= */
 .modal-content {
-  background-color: #2b2b2b;
+  background-color: var(--bg-card);
   padding: 30px;
   border-radius: 8px;
-  width: 90%;
-  max-width: 400px;
-  color: #f5f5dc;
+  border: 1px solid var(--primary);
 }
 
-.modal-content input {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  background-color: #1a1a1a;
-  border: 1px solid #c5a047;
-  color: #fff;
+/* Estilo para as datas ficarem em linha (Baseado na sua imagem) */
+.calendar-days,
+.datas-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px 0;
 }
 
-.modal-content button {
-  width: 100%;
-  padding: 12px;
-  background-color: #c5a047;
-  border: none;
+.calendar-day {
+  min-width: 60px;
+  padding: 10px;
+  background: #333;
+  border-radius: 8px;
+  text-align: center;
   cursor: pointer;
 }
 
-.close {
-  float: right;
-  cursor: pointer;
+.calendar-day.active {
+  background: #007bff; /* Azul destaque da sua captura */
+  color: white;
 }
 
-/* RESPONSIVO */
-@media (max-width: 768px) {
-  .hero-content h2 {
-    font-size: 32px;
-  }
-
-  .hero-content p {
-    font-size: 16px;
-  }
-
-  .service-card {
-    height: 200px;
-  }
-
-  .barber-img img {
-    height: 200px;
-  }
+/* ================= FOOTER ================= */
+footer {
+  background-color: var(--bg-darker);
+  text-align: center;
+  padding: 20px 0;
+  border-top: 2px solid var(--primary);
 }

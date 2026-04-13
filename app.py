@@ -112,6 +112,9 @@ def cadastro():
     db.session.add(novo_usuario)
     db.session.commit()
 
+    # 🔥 CORREÇÃO ADICIONADA: Faz o login do usuário automaticamente após o cadastro
+    login_user(novo_usuario)
+
     return jsonify({"success": True})
 
 

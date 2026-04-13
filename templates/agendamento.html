@@ -10,260 +10,287 @@
 
 <body>
 
-    <section class="agendamento">
-        <div class="agendamento-container">
+    <section class="agendamento-section">
+        <div class="container agendamento-container">
 
-            <h2>Agende seu Horário</h2>
+            <!-- VOLTAR -->
+            <div class="voltar-topo">
+                <a href="{{ url_for('index') }}" class="btn-voltar">← Voltar</a>
+            </div>
 
-            <!-- BOTÃO VOLTAR -->
-            <a href="{{ url_for('index') }}" class="btn-agendar" style="margin-bottom:15px; display:inline-block;">
-                ← Voltar para Página Inicial
-            </a>
-
+            <!-- ALERTAS -->
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div class="flash-messages">
                 {% for message in messages %}
-                <p>{{ message }}</p>
+                <p class="alert">{{ message }}</p>
                 {% endfor %}
             </div>
             {% endif %}
             {% endwith %}
 
-            <form action="{{ url_for('agendamento') }}" method="POST" id="formAgendamento">
+            <!-- ================= BOX AGENDAMENTO ================= -->
+            <div class="agendamento-box">
 
-                <!-- BARBEIRO -->
-                <div class="input-group">
-                    <label>Barbeiro</label>
-                    <select name="barbeiro" id="barbeiro" required>
-                        <option value="">Selecione</option>
-                        {% for barbeiro in barbeiros %}
-                        <option value="{{ barbeiro.id }}">
-                            {{ barbeiro.nome }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                <!-- HEADER -->
+                <div class="calendario-header">
+                    <button type="button" id="btn-prev-data" class="nav-seta">←</button>
+                    <h3 id="mesAnoAtual">Carregando...</h3>
+                    <button type="button" id="btn-next-data" class="nav-seta">→</button>
                 </div>
 
-                <!-- SERVIÇO -->
-                <div class="input-group">
-                    <label>Serviço</label>
-                    <select name="servico" required>
-                        <option value="">Selecione</option>
-                        {% for servico in servicos %}
-                        <option value="{{ servico.id }}">
-                            {{ servico.nome }} - R$ {{ servico.preco }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <!-- DIAS -->
+                <div class="dias-carrossel" id="diasContainer"></div>
 
-                <!-- DATA -->
-                <div class="input-group">
-                    <label>Data</label>
-                    <input type="date" name="data" id="data" required>
-                </div>
+                <form action="{{ url_for('agendamento') }}" method="POST" id="formAgendamento">
 
-                <!-- HORÁRIOS -->
-                <div class="input-group">
-                    <label>Horários disponíveis</label>
-                    <div class="horarios-grid" id="horarios"></div>
-                    <input type="hidden" name="horario" id="horarioSelecionado" required>
-                </div>
+                    <input type="hidden" name="data" id="dataSelecionada">
+                    <input type="hidden" name="barbeiro" id="barbeiroSelecionado">
+                    <input type="hidden" name="horario" id="horarioSelecionado">
 
-                <!-- PAGAMENTO -->
-                <div class="input-group">
-                    <label>Forma de Pagamento</label>
-                    <select name="forma_pagamento" required>
-                        <option value="">Selecione</option>
-                        <option value="Cartão">Cartão</option>
-                        <option value="Pix">Pix</option>
-                        <option value="Presencial">Presencial</option>
-                    </select>
-                </div>
+                    <!-- BARBEIROS -->
+                    <div class="secao-ui">
+                        <label>Profissional</label>
+                        <div class="barbeiros-lista">
+                            {% for barbeiro in barbeiros %}
+                            <div class="barbeiro-avatar" data-id="{{ barbeiro.id }}">
+                                <img src="{{ url_for('static', filename='imagens/' ~ barbeiro.foto) }}">
+                                <span>{{ barbeiro.nome }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
 
-                <button type="submit" class="btn-agendar">
-                    Confirmar Agendamento
-                </button>
+                    <!-- SERVIÇOS -->
+                    <div class="secao-ui">
+                        <label>Serviço</label>
+                        <select name="servico" class="select-dark" required>
+                            <option value="">Escolha...</option>
+                            {% for servico in servicos %}
+                            <option value="{{ servico.id }}">
+                                {{ servico.nome }} - R$ {{ servico.preco }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-            </form>
+                    <!-- HORÁRIOS -->
+                    <div class="secao-ui">
+                        <label>Horários</label>
+                        <div class="horarios-grid" id="horarios">
+                            <div class="caixa-aviso">
+                                <p>Selecione data e profissional</p>
+                            </div>
+                        </div>
+                    </div>
 
-            <hr>
+                    <!-- PAGAMENTO -->
+                    <div class="secao-ui">
+                        <label>Pagamento</label>
+                        <select name="forma_pagamento" class="select-dark" required>
+                            <option value="">Selecione...</option>
+                            <option value="Cartão">Cartão</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Presencial">Presencial</option>
+                        </select>
+                    </div>
 
-            <h3>Meus Agendamentos</h3>
+                    <button type="submit" class="btn-agendar-submit">
+                        Confirmar Agendamento
+                    </button>
 
-            {% if agendamentos %}
-            {% for ag in agendamentos %}
-            <div class="card-agendamento">
-                <p>
-                    {{ ag.data.strftime('%d/%m/%Y') }} -
-                    {{ ag.horario.strftime('%H:%M') }} -
-                    {{ ag.barbeiro.nome }} -
-                    {{ ag.servico.nome }}
-                </p>
-
-                <button onclick="cancelarAgendamento({{ ag.id }}, '{{ ag.data }}', '{{ ag.horario }}')"
-                    class="btn-agendar" style="margin-top:10px;">
-                    Cancelar
-                </button>
+                </form>
             </div>
-            {% endfor %}
-            {% else %}
-            <p>Sem agendamentos.</p>
-            {% endif %}
+
+            <!-- ================= MEUS AGENDAMENTOS ================= -->
+            <div class="meus-agendamentos-box">
+
+                <div class="header-agendamentos">
+                    <h3>Meus Agendamentos</h3>
+                    <span class="badge">{{ agendamentos|length if agendamentos else 0 }}</span>
+                </div>
+
+                <div class="divider-sm"></div>
+
+                {% if agendamentos %}
+                <div class="agendamentos-lista">
+
+                    {% for ag in agendamentos %}
+                    <div class="agendamento-card">
+
+                        <div class="agendamento-left">
+
+                            <img src="{{ url_for('static', filename='imagens/' ~ ag.barbeiro.foto) }}"
+                                class="agendamento-img">
+
+                            <div class="agendamento-info">
+                                <h3>{{ ag.servico.nome }}</h3>
+
+                                <p class="barbeiro">
+                                    {{ ag.barbeiro.nome }}
+                                </p>
+
+                                <p class="data">
+                                    {{ ag.data.strftime('%d/%m/%Y') }}
+                                    <span>•</span>
+                                    {{ ag.horario.strftime('%H:%M') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="agendamento-actions">
+                            <button onclick="cancelarAgendamento({{ ag.id }}, '{{ ag.data }}', '{{ ag.horario }}')"
+                                class="btn-cancelar">
+                                ✕
+                            </button>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <p>Você ainda não possui agendamentos</p>
+                </div>
+                {% endif %}
+            </div>
 
         </div>
     </section>
 
-    <!-- ================= JS ================= -->
     <script>
-        const horariosContainer = document.getElementById("horarios");
-        const inputHorario = document.getElementById("horarioSelecionado");
-        const inputData = document.getElementById("data");
-        const selectBarbeiro = document.getElementById("barbeiro");
-        const form = document.getElementById("formAgendamento");
+        document.addEventListener("DOMContentLoaded", function () {
 
-        let horariosOcupados = [];
+            const diasContainer = document.getElementById("diasContainer");
+            const mesAnoLabel = document.getElementById("mesAnoAtual");
+            const inputData = document.getElementById("dataSelecionada");
+            const inputBarbeiro = document.getElementById("barbeiroSelecionado");
+            const inputHorario = document.getElementById("horarioSelecionado");
+            const horariosContainer = document.getElementById("horarios");
 
-        const hoje = new Date().toISOString().split("T")[0];
-        inputData.min = hoje;
+            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-        // 🔒 BLOQUEIA DOMINGOS E FERIADOS
-        inputData.addEventListener("input", () => {
-            if (!inputData.value) return;
+            let horariosOcupados = [];
+            let offsetSemana = 0;
+            const hoje = new Date();
 
-            const dataSelecionada = new Date(inputData.value + "T00:00:00");
+            function gerarDias() {
+                diasContainer.innerHTML = "";
 
-            if (dataSelecionada.getDay() === 0) {
-                alert("Não atendemos aos domingos!");
-                inputData.value = "";
-                horariosContainer.innerHTML = "";
-                return;
-            }
+                let base = new Date();
+                base.setDate(hoje.getDate() + offsetSemana);
 
-            const feriados = ["2026-01-01", "2026-12-25"];
+                for (let i = 0; i < 7; i++) {
+                    let d = new Date(base);
+                    d.setDate(base.getDate() + i);
 
-            if (feriados.includes(inputData.value)) {
-                alert("Não atendemos em feriados!");
-                inputData.value = "";
-                horariosContainer.innerHTML = "";
-            }
-        });
+                    if (d.getDay() === 0) continue;
 
-        function gerarHorarios() {
-            const horarios = [];
+                    let dataIso = d.toISOString().split("T")[0];
 
-            function adicionar(inicio, fim) {
-                let [h, m] = inicio.split(":").map(Number);
-                const [hf, mf] = fim.split(":").map(Number);
+                    let btn = document.createElement("div");
+                    btn.className = "dia-card";
 
-                while (h < hf || (h === hf && m <= mf)) {
-                    horarios.push(
-                        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
-                    );
-                    m += 30;
-                    if (m >= 60) {
-                        m = 0;
-                        h++;
-                    }
+                    btn.innerHTML = `
+                <span>${diasSemana[d.getDay()]}</span>
+                <strong>${String(d.getDate()).padStart(2, '0')}</strong>
+            `;
+
+                    btn.onclick = () => {
+                        document.querySelectorAll(".dia-card").forEach(el => el.classList.remove("ativo"));
+                        btn.classList.add("ativo");
+
+                        inputData.value = dataIso;
+                        mesAnoLabel.innerText = `${meses[d.getMonth()]} ${d.getFullYear()}`;
+
+                        carregarHorarios();
+                    };
+
+                    diasContainer.appendChild(btn);
                 }
+
+                mesAnoLabel.innerText = `${meses[base.getMonth()]} ${base.getFullYear()}`;
             }
 
-            adicionar("08:30", "12:00");
-            adicionar("13:30", "21:00");
+            document.getElementById("btn-next-data").onclick = () => {
+                offsetSemana += 7;
+                gerarDias();
+            };
 
-            return horarios;
-        }
+            document.getElementById("btn-prev-data").onclick = () => {
+                offsetSemana -= 7;
+                gerarDias();
+            };
 
-        function renderHorarios() {
-            const horarios = gerarHorarios();
-            horariosContainer.innerHTML = "";
-
-            const agora = new Date();
-
-            horarios.forEach(h => {
-                const [hora, minuto] = h.split(":");
-                const dataHora = new Date(`${inputData.value}T${hora}:${minuto}:00`);
-
-                // 🔒 remove horários passados (HOJE)
-                if (inputData.value === hoje && dataHora <= agora) return;
-
-                // 🔒 remove horários ocupados
-                if (horariosOcupados.includes(h)) return;
-
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.innerText = h;
-                btn.classList.add("horario-btn", "livre");
-
-                btn.onclick = () => {
-                    document.querySelectorAll(".horario-btn")
-                        .forEach(b => b.classList.remove("selecionado"));
-
-                    btn.classList.add("selecionado");
-                    inputHorario.value = h;
+            document.querySelectorAll(".barbeiro-avatar").forEach(avatar => {
+                avatar.onclick = () => {
+                    document.querySelectorAll(".barbeiro-avatar").forEach(el => el.classList.remove("ativo"));
+                    avatar.classList.add("ativo");
+                    inputBarbeiro.value = avatar.dataset.id;
+                    carregarHorarios();
                 };
-
-                horariosContainer.appendChild(btn);
             });
 
-            if (horariosContainer.innerHTML === "") {
-                horariosContainer.innerHTML = "<p>Sem horários disponíveis</p>";
+            function gerarHorariosArray() {
+                const h = [];
+                function add(i, f) {
+                    let [hh, mm] = i.split(":").map(Number);
+                    const [hf, mf] = f.split(":").map(Number);
+                    while (hh < hf || (hh === hf && mm <= mf)) {
+                        h.push(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
+                        mm += 30; if (mm >= 60) { mm = 0; hh++; }
+                    }
+                }
+                add("08:30", "12:00");
+                add("13:30", "21:00");
+                return h;
             }
-        }
 
-        function carregarHorarios() {
-            const barbeiroId = selectBarbeiro.value;
-            const data = inputData.value;
+            function renderHorarios() {
+                const horarios = gerarHorariosArray();
+                horariosContainer.innerHTML = "";
 
-            if (!barbeiroId || !data) {
-                horariosContainer.innerHTML = "<p>Selecione barbeiro e data</p>";
-                return;
-            }
+                horarios.forEach(h => {
+                    if (horariosOcupados.includes(h)) return;
 
-            fetch(`/horarios-ocupados?barbeiro_id=${barbeiroId}&data=${data}`)
-                .then(res => res.json())
-                .then(data => {
-                    horariosOcupados = data;
-                    inputHorario.value = "";
-                    renderHorarios();
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.innerText = h;
+                    btn.classList.add("horario-btn");
+
+                    btn.onclick = () => {
+                        document.querySelectorAll(".horario-btn").forEach(b => b.classList.remove("selecionado"));
+                        btn.classList.add("selecionado");
+                        inputHorario.value = h;
+                    };
+
+                    horariosContainer.appendChild(btn);
                 });
-        }
-
-        selectBarbeiro.addEventListener("change", carregarHorarios);
-        inputData.addEventListener("change", carregarHorarios);
-
-        form.addEventListener("submit", function (e) {
-            if (!inputHorario.value) {
-                e.preventDefault();
-                alert("Selecione um horário!");
             }
+
+            function carregarHorarios() {
+                if (!inputBarbeiro.value || !inputData.value) return;
+
+                horariosContainer.innerHTML = "<div class='caixa-aviso'>Carregando...</div>";
+
+                fetch(`/horarios-ocupados?barbeiro_id=${inputBarbeiro.value}&data=${inputData.value}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        horariosOcupados = data;
+                        renderHorarios();
+                    });
+            }
+
+            gerarDias();
         });
 
         function cancelarAgendamento(id, data, horario) {
-            const agora = new Date();
-            const dataHoraAgendamento = new Date(`${data}T${horario}`);
-            const diffHoras = (dataHoraAgendamento - agora) / (1000 * 60 * 60);
+            if (!confirm("Cancelar agendamento?")) return;
 
-            if (diffHoras < 3) {
-                alert("Só é possível cancelar com no mínimo 3 horas de antecedência!");
-                return;
-            }
-
-            if (!confirm("Deseja realmente cancelar este agendamento?")) return;
-
-            fetch(`/cancelar-agendamento/${id}`, {
-                method: "POST"
-            })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.erro) {
-                        alert(res.erro);
-                    } else {
-                        alert("Agendamento cancelado!");
-                        location.reload();
-                    }
-                });
+            fetch(`/cancelar-agendamento/${id}`, { method: "POST" })
+                .then(() => location.reload());
         }
     </script>
 

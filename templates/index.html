@@ -11,14 +11,11 @@
 
 <body>
 
-    <!-- ================= HEADER ================= -->
     <header class="header">
         <div class="container header-container">
-
             <div class="logo">
                 <h1>Old School <span>Barber</span></h1>
             </div>
-
             <nav class="nav">
                 <ul class="nav-links">
                     <li><a href="{{ url_for('index') }}">Página Inicial</a></li>
@@ -34,43 +31,40 @@
                         <a href="{{ url_for('logout') }}">Sair</a>
                     </li>
                     {% else %}
-                    <li>
-                        <a href="#" onclick="abrirModalLogin()">Login</a>
-                    </li>
-                    <li class="nav-btn">
-                        <a href="#" onclick="abrirModalCadastro()" class="btn-outline">Cadastro</a>
-                    </li>
+                    <li><a href="#" id="btn-nav-login">Login</a></li>
+                    <li class="nav-btn"><a href="#" id="btn-nav-cadastro" class="btn-outline">Cadastro</a></li>
                     {% endif %}
                 </ul>
             </nav>
-
         </div>
     </header>
 
-    <!-- ================= HERO ================= -->
-    <section class="hero"
-        style="background: url('{{ url_for('static', filename='imagens/barba.png') }}') center/cover no-repeat;">
+    <div class="container flash-container">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for message in messages %}
+            <p class="alert">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
 
+    <section class="hero">
         <div class="hero-overlay"></div>
-
         <div class="container hero-content">
             <h2>Tradição & Excelência</h2>
             <p>Desde 1998 elevando o padrão da barbearia clássica</p>
 
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('agendamento') }}" class="btn-primary">
-                Agendar Horário
-            </a>
+            <a href="{{ url_for('agendamento') }}" class="btn-primary">Agendar Horário</a>
             {% else %}
-            <a href="#" onclick="abrirModalLogin()" class="btn-primary">
-                Entrar para Agendar
-            </a>
+            <a href="#" id="btn-hero-login" class="btn-primary">Entrar para Agendar</a>
             {% endif %}
         </div>
-
     </section>
 
-    <!-- ================= SOBRE ================= -->
     <section id="sobre" class="section">
         <div class="container">
             <div class="section-header">
@@ -78,216 +72,100 @@
                 <div class="divider"></div>
             </div>
             <div class="section-content">
-                <p>
-                    Há mais de 20 anos, a Old School Barber oferece cortes clássicos
-                    e serviços de barbearia com tradição, técnica refinada e
-                    atendimento personalizado.
-                </p>
+                <p>Há mais de 20 anos, a Old School Barber oferece cortes clássicos e serviços de barbearia com
+                    tradição, técnica refinada e atendimento personalizado.</p>
             </div>
         </div>
     </section>
 
-    <!-- ================= SERVIÇOS ================= -->
     <section id="servicos" class="section dark">
         <div class="container">
             <div class="section-header">
                 <h2>Nossos Serviços</h2>
                 <div class="divider"></div>
             </div>
-
             <div class="cards-grid">
-
-                <div class="service-card"
-                    style="background: url('{{ url_for('static', filename='imagens/corte_classico.png') }}') center/cover;">
+                <div class="service-card">
                     <h3>Corte Clássico</h3>
                     <p>Corte tradicional com acabamento premium.</p>
                     <span class="price">R$ 35</span>
                 </div>
-
-                <div class="service-card"
-                    style="background: url('{{ url_for('static', filename='imagens/barba.png') }}') center/cover;">
+                <div class="service-card">
                     <h3>Barba Tradicional</h3>
                     <p>Modelagem completa com toalha quente.</p>
                     <span class="price">R$ 25</span>
                 </div>
-
-                <div class="service-card"
-                    style="background: url('{{ url_for('static', filename='imagens/corte_barba.png') }}') center/cover;">
+                <div class="service-card">
                     <h3>Corte + Barba</h3>
                     <p>Combo completo com acabamento refinado.</p>
                     <span class="price">R$ 55</span>
                 </div>
-
-                <div class="service-card"
-                    style="background: url('{{ url_for('static', filename='imagens/tratamento_premium.png') }}') center/cover;">
+                <div class="service-card">
                     <h3>Tratamento Premium</h3>
                     <p>Hidratação e cuidados especiais.</p>
                     <span class="price">R$ 70</span>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <!-- ================= BARBEIROS ================= -->
     <section id="barbeiros" class="section">
         <div class="container">
             <div class="section-header">
                 <h2>Nossos Barbeiros</h2>
                 <div class="divider"></div>
             </div>
-
             <div class="cards-grid">
                 {% for barbeiro in barbeiros %}
                 <div class="barber-card">
-
                     <div class="barber-img">
                         <img src="{{ url_for('static', filename='imagens/' ~ barbeiro.foto) }}"
                             alt="{{ barbeiro.nome }}">
                     </div>
-
                     <div class="barber-info">
                         <h3>{{ barbeiro.nome }}</h3>
                         <p>{{ barbeiro.especialidade }}</p>
                     </div>
-
                 </div>
                 {% endfor %}
             </div>
         </div>
     </section>
 
-    <!-- ================= FOOTER ================= -->
     <footer class="footer">
         <div class="container">
             <p>© 2026 Old School Barber • Todos os direitos reservados</p>
         </div>
     </footer>
 
-    <!-- ================= MODAL LOGIN ================= -->
     <div id="modal-login" class="modal">
         <div class="modal-content">
-            <span onclick="fecharModal()" class="close">&times;</span>
+            <span class="close-btn" id="close-login">&times;</span>
             <h2>Login</h2>
-
             <form id="form-login">
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="senha" placeholder="Senha" required>
+                <input type="email" name="email" placeholder="Email" autocomplete="email" required>
+                <input type="password" name="senha" placeholder="Senha" autocomplete="current-password" required>
                 <button type="submit">Entrar</button>
                 <p id="login-erro" class="erro"></p>
             </form>
         </div>
     </div>
 
-    <!-- ================= MODAL CADASTRO ================= -->
     <div id="modal-cadastro" class="modal">
         <div class="modal-content">
-            <span onclick="fecharModal()" class="close">&times;</span>
+            <span class="close-btn" id="close-cadastro">&times;</span>
             <h2>Cadastro</h2>
-
             <form id="form-cadastro">
-                <input type="text" name="nome" placeholder="Nome" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <input type="password" name="senha" placeholder="Senha" required>
+                <input type="text" name="nome" placeholder="Nome" autocomplete="name" required>
+                <input type="email" name="email" placeholder="Email" autocomplete="email" required>
+                <input type="password" name="senha" placeholder="Senha" autocomplete="new-password" required>
                 <button type="submit">Cadastrar</button>
                 <p id="cadastro-erro" class="erro"></p>
             </form>
         </div>
     </div>
 
-    <!-- ================= JS ================= -->
-    <script>
-
-        function abrirModalLogin() {
-            document.getElementById("modal-login").style.display = "flex";
-        }
-
-        function abrirModalCadastro() {
-            document.getElementById("modal-cadastro").style.display = "flex";
-        }
-
-        function fecharModal() {
-            document.getElementById("modal-login").style.display = "none";
-            document.getElementById("modal-cadastro").style.display = "none";
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-
-            const formLogin = document.getElementById("form-login");
-            const formCadastro = document.getElementById("form-cadastro");
-
-            // LOGIN
-            if (formLogin) {
-                formLogin.addEventListener("submit", async function (e) {
-                    e.preventDefault();
-
-                    const formData = new FormData(this);
-
-                    try {
-                        const response = await fetch("/login", {
-                            method: "POST",
-                            body: formData,
-                            headers: {
-                                "X-Requested-With": "XMLHttpRequest",
-                                "Accept": "application/json"
-                            }
-                        });
-
-                        if (!response.ok) throw new Error("Erro HTTP " + response.status);
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            location.reload();
-                        } else {
-                            document.getElementById("login-erro").innerText = data.message;
-                        }
-
-                    } catch (error) {
-                        console.error(error);
-                        alert("Erro ao fazer login");
-                    }
-                });
-            }
-
-            // CADASTRO
-            if (formCadastro) {
-                formCadastro.addEventListener("submit", async function (e) {
-                    e.preventDefault();
-
-                    const formData = new FormData(this);
-
-                    try {
-                        const response = await fetch("/cadastro", {
-                            method: "POST",
-                            body: formData,
-                            headers: {
-                                "X-Requested-With": "XMLHttpRequest",
-                                "Accept": "application/json"
-                            }
-                        });
-
-                        if (!response.ok) throw new Error("Erro HTTP " + response.status);
-
-                        const data = await response.json();
-
-                        if (data.success) {
-                            alert("Cadastro realizado com sucesso!");
-                            fecharModal();
-                        } else {
-                            document.getElementById("cadastro-erro").innerText = data.message;
-                        }
-
-                    } catch (error) {
-                        console.error(error);
-                        alert("Erro ao cadastrar");
-                    }
-                });
-            }
-
-        });
-
-    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
 
