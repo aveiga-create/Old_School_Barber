@@ -6,7 +6,7 @@
   --bg-darker: #111;
   --bg-card: #2b2b2b;
   --text-color: #f5f5dc;
-  --transition: 0.3s ease;
+  --transition: 0.4s ease;
 }
 
 /* ================= RESET BÁSICO ================= */
@@ -111,6 +111,10 @@ nav a:hover {
   transition: var(--transition);
 }
 
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
 /* ================= GRID DE SERVIÇOS E BARBEIROS ================= */
 .section {
   padding: 80px 0;
@@ -123,7 +127,7 @@ nav a:hover {
   gap: 30px;
 }
 
-/* SERVIÇOS */
+/* ================= SERVIÇOS ================= */
 .service-card {
   position: relative;
   height: 250px;
@@ -133,6 +137,8 @@ nav a:hover {
   flex-direction: column;
   justify-content: center;
   border: 1px solid var(--primary);
+  transition: var(--transition); /* Adicionado para a animação do card */
+  cursor: pointer;
 }
 
 .service-card::before {
@@ -141,7 +147,7 @@ nav a:hover {
   inset: 0;
   background-size: cover;
   background-position: center;
-  transition: 0.4s;
+  transition: transform 0.5s ease; /* Animação suave no fundo */
   z-index: 1;
 }
 
@@ -151,6 +157,7 @@ nav a:hover {
   inset: 0;
   background: rgba(0, 0, 0, 0.65);
   z-index: 2;
+  transition: background 0.4s ease;
 }
 
 .service-card h3,
@@ -158,6 +165,21 @@ nav a:hover {
 .service-card span {
   position: relative;
   z-index: 3;
+}
+
+/* Efeito Hover nos Serviços (Flutuar e Zoom) */
+.service-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+  border-color: var(--primary-hover);
+}
+
+.service-card:hover::before {
+  transform: scale(1.1); /* Dá um zoom na imagem de fundo */
+}
+
+.service-card:hover::after {
+  background: rgba(0, 0, 0, 0.5); /* Clareia um pouco ao passar o mouse */
 }
 
 /* Imagens dos Serviços */
@@ -174,22 +196,44 @@ nav a:hover {
   background-image: url("../imagens/tratamento_premium.png");
 }
 
-/* BARBEIROS */
+/* ================= BARBEIROS ================= */
 .barber-card {
   background-color: var(--bg-card);
   border: 1px solid var(--primary);
   border-radius: 10px;
   overflow: hidden;
   transition: var(--transition);
+  cursor: pointer;
+}
+
+.barber-img {
+  overflow: hidden; /* Importante para o zoom da imagem não vazar do card */
 }
 
 .barber-img img {
   width: 100%;
   height: 250px;
   object-fit: cover;
+  object-position: top; /* <--- FOCA NO ROSTO DO BARBEIRO NO TOPO */
+  transition: transform 0.5s ease; /* Prepara a imagem para o zoom */
 }
 
-/* ================= MEUS AGENDAMENTOS (AQUI ESTÁ A CORREÇÃO) ================= */
+/* Efeito Hover nos Barbeiros (Flutuar e Zoom no rosto) */
+.barber-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 25px rgba(197, 160, 71, 0.15);
+  border-color: var(--primary-hover);
+}
+
+.barber-card:hover .barber-img img {
+  transform: scale(1.08); /* Zoom sutil na foto do barbeiro */
+}
+
+.barber-info {
+  padding: 15px;
+}
+
+/* ================= MEUS AGENDAMENTOS (LISTA DO USUÁRIO) ================= */
 .meus-agendamentos {
   padding: 80px 0;
 }
@@ -201,7 +245,6 @@ nav a:hover {
   margin-bottom: 40px;
 }
 
-/* Grid para os cards de agendamento ficarem lado a lado */
 .agendamentos-lista {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -246,35 +289,340 @@ nav a:hover {
   font-size: 12px;
 }
 
-/* ================= CALENDÁRIO / MODAL ================= */
+/* ================= TELA DE AGENDAMENTO (NOVO VISUAL APP DARK) ================= */
+.agendamento-section {
+  padding: 60px 0;
+  min-height: 80vh;
+}
+
+.agendamento-box {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 650px;
+  margin: 0 auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: #e0e0e0;
+}
+
+/* Header Calendário */
+.calendario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.calendario-header h3 {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.nav-seta {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.nav-seta:hover {
+  background-color: #555;
+}
+
+/* Carrossel de Dias (Pílulas) */
+.dias-carrossel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid #333;
+  scrollbar-width: thin;
+  scrollbar-color: #555 #1a1a1a;
+}
+
+.dias-carrossel::-webkit-scrollbar {
+  height: 6px;
+}
+.dias-carrossel::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 10px;
+}
+
+.dia-card {
+  background-color: transparent;
+  border: 1px solid #333;
+  border-radius: 8px;
+  min-width: 65px;
+  height: 75px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.dia-card span {
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 4px;
+}
+.dia-card strong {
+  font-size: 18px;
+  color: #fff;
+  font-weight: 500;
+}
+.dia-card:hover {
+  border-color: #666;
+  background-color: #222;
+}
+
+.dia-card.ativo {
+  background-color: #0078d4;
+  border-color: #0078d4;
+}
+.dia-card.ativo span,
+.dia-card.ativo strong {
+  color: #ffffff;
+}
+
+/* UI e Barbeiros Circulares no Agendamento */
+.secao-ui {
+  margin-bottom: 30px;
+}
+.secao-ui label {
+  display: block;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #ffffff;
+}
+
+.barbeiros-lista {
+  display: flex;
+  gap: 25px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.barbeiro-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.3s;
+  min-width: 80px;
+}
+
+.barbeiro-avatar img {
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top; /* Foca no rosto também aqui */
+  border: 2px solid transparent;
+  background-color: #2a2a2a;
+  padding: 2px;
+  transition: 0.3s;
+}
+
+.barbeiro-avatar span {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #bbb;
+  text-align: center;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+.barbeiro-avatar:hover img {
+  border-color: #666;
+}
+.barbeiro-avatar.ativo img {
+  border-color: #0078d4;
+}
+.barbeiro-avatar.ativo span {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Caixa de Aviso (Horários) */
+.caixa-aviso {
+  background-color: #222;
+  padding: 18px 20px;
+  border-radius: 8px;
+  color: #999;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.caixa-aviso::before {
+  content: "🕒";
+  font-size: 18px;
+}
+.caixa-aviso p {
+  margin: 0;
+}
+
+/* Grid de Horários e Selects */
+.horarios-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.horario-btn {
+  background-color: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 14px;
+  font-weight: 500;
+}
+.horario-btn:hover {
+  background-color: #3a3a3a;
+}
+.horario-btn.selecionado {
+  background-color: #0078d4;
+  border-color: #0078d4;
+  color: white;
+}
+
+.select-dark {
+  width: 100%;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #444;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+}
+.select-dark:focus {
+  border-color: #0078d4;
+}
+
+.btn-agendar-submit {
+  width: 100%;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  margin-top: 15px;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+.btn-agendar-submit:hover {
+  background-color: #005fa3;
+}
+
+/* ================= MODAIS DE LOGIN E CADASTRO ================= */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.show {
+  display: flex !important;
+}
+
 .modal-content {
   background-color: var(--bg-card);
-  padding: 30px;
-  border-radius: 8px;
+  padding: 40px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
   border: 1px solid var(--primary);
-}
-
-/* Estilo para as datas ficarem em linha (Baseado na sua imagem) */
-.calendar-days,
-.datas-container {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 10px 0;
-}
-
-.calendar-day {
-  min-width: 60px;
-  padding: 10px;
-  background: #333;
-  border-radius: 8px;
+  position: relative;
   text-align: center;
-  cursor: pointer;
 }
 
-.calendar-day.active {
-  background: #007bff; /* Azul destaque da sua captura */
+.modal-content h2 {
+  color: var(--primary);
+  font-family: "Cinzel", serif;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  color: var(--text-color);
+  font-size: 28px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.close-btn:hover {
+  color: var(--primary);
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-content input {
+  padding: 12px;
+  border-radius: 5px;
+  border: 1px solid #555;
+  background: #222;
   color: white;
+  font-size: 16px;
+}
+
+.modal-content button {
+  padding: 15px;
+  background: var(--primary);
+  color: #111;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+
+.modal-content button:hover {
+  background: var(--primary-hover);
+}
+.erro {
+  color: #ff4c4c;
+  font-size: 14px;
+  margin-top: 10px;
 }
 
 /* ================= FOOTER ================= */
@@ -283,4 +631,197 @@ footer {
   text-align: center;
   padding: 20px 0;
   border-top: 2px solid var(--primary);
+}
+
+/* ================= BOTÃO VOLTAR (ESTILO RETRÔ) ================= */
+.btn-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  padding: 10px 20px;
+  font-family: "Cinzel", serif;
+  font-size: 14px;
+  font-weight: bold;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.4s ease;
+  margin-bottom: 20px;
+}
+
+/* Efeito ao passar o mouse: o fundo fica dourado e o texto escuro */
+.btn-voltar:hover {
+  background-color: var(--primary);
+  color: var(--bg-darker);
+  box-shadow: 0 0 15px rgba(197, 160, 71, 0.4);
+  transform: translateX(-5px); /* Dá um leve pulinho para a esquerda */
+}
+
+/* ================= LISTA DE MEUS AGENDAMENTOS (NOVO LAYOUT) ================= */
+.meus-agendamentos-box {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 650px;
+  margin: 40px auto 80px auto; /* Centraliza e dá espaço em baixo */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.header-agendamentos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.header-agendamentos h3 {
+  color: #fff;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.badge {
+  background-color: var(--primary);
+  color: #111;
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.divider-sm {
+  height: 1px;
+  background-color: #333;
+  margin-bottom: 25px;
+}
+
+.agendamento-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #222;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  margin-bottom: 15px;
+  transition: 0.3s;
+}
+
+.agendamento-card:hover {
+  border-color: var(--primary);
+}
+
+.agendamento-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.agendamento-img {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+  border: 2px solid var(--primary);
+}
+
+.agendamento-info h3 {
+  color: var(--primary);
+  font-family: "Cinzel", serif;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.agendamento-info p {
+  color: #bbb;
+  font-size: 13px;
+  margin: 0;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+.agendamento-info .data span {
+  color: var(--primary);
+  margin: 0 5px;
+}
+
+.btn-cancelar {
+  background-color: transparent;
+  color: #ff4c4c;
+  border: 1px solid #ff4c4c;
+  width: 35px;
+  height: 35px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-cancelar:hover {
+  background-color: #ff4c4c;
+  color: white;
+}
+
+.empty-state {
+  text-align: center;
+  color: #888;
+  padding: 30px 0;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+/* ==========================================
+   ESTILO RETRÔ PARA TÍTULOS DE SEÇÃO
+   ========================================== */
+.titulo-retro {
+  /* Cor principal dourado envelhecido */
+  color: #cba135;
+  text-align: center;
+  font-size: 2.8rem;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-weight: bold;
+  margin-bottom: 40px;
+
+  /* Sombra dura para criar o efeito 3D de placa antiga */
+  text-shadow:
+    2px 2px 0px #1a1a1a,
+    4px 4px 0px rgba(0, 0, 0, 0.5);
+}
+/* ==========================================
+   ESTILOS DA BARRA DE NAVEGAÇÃO E LOGO
+   ========================================== */
+.navbar {
+  display: flex;
+  justify-content: space-between; /* Joga a logo pra esquerda e abas pra direita */
+  align-items: center; /* Centraliza tudo verticalmente */
+  padding: 15px 50px;
+  background-color: #1a1a1a; /* Cor de fundo retrô escura */
+  border-bottom: 2px solid #cba135; /* Linha dourada para dar um charme */
+}
+
+.logo-img {
+  height: 60px; /* Ajuste este valor dependendo do tamanho da sua logo */
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+/* Efeito de zoom bem sutil ao passar o mouse na logo */
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 30px; /* Espaço entre as abas */
 }

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendamento - Old School Barber</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imagens/favicon.png') }}">
 </head>
 
 <body>
@@ -158,141 +159,7 @@
 
         </div>
     </section>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
-            const diasContainer = document.getElementById("diasContainer");
-            const mesAnoLabel = document.getElementById("mesAnoAtual");
-            const inputData = document.getElementById("dataSelecionada");
-            const inputBarbeiro = document.getElementById("barbeiroSelecionado");
-            const inputHorario = document.getElementById("horarioSelecionado");
-            const horariosContainer = document.getElementById("horarios");
-
-            const meses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-
-            let horariosOcupados = [];
-            let offsetSemana = 0;
-            const hoje = new Date();
-
-            function gerarDias() {
-                diasContainer.innerHTML = "";
-
-                let base = new Date();
-                base.setDate(hoje.getDate() + offsetSemana);
-
-                for (let i = 0; i < 7; i++) {
-                    let d = new Date(base);
-                    d.setDate(base.getDate() + i);
-
-                    if (d.getDay() === 0) continue;
-
-                    let dataIso = d.toISOString().split("T")[0];
-
-                    let btn = document.createElement("div");
-                    btn.className = "dia-card";
-
-                    btn.innerHTML = `
-                <span>${diasSemana[d.getDay()]}</span>
-                <strong>${String(d.getDate()).padStart(2, '0')}</strong>
-            `;
-
-                    btn.onclick = () => {
-                        document.querySelectorAll(".dia-card").forEach(el => el.classList.remove("ativo"));
-                        btn.classList.add("ativo");
-
-                        inputData.value = dataIso;
-                        mesAnoLabel.innerText = `${meses[d.getMonth()]} ${d.getFullYear()}`;
-
-                        carregarHorarios();
-                    };
-
-                    diasContainer.appendChild(btn);
-                }
-
-                mesAnoLabel.innerText = `${meses[base.getMonth()]} ${base.getFullYear()}`;
-            }
-
-            document.getElementById("btn-next-data").onclick = () => {
-                offsetSemana += 7;
-                gerarDias();
-            };
-
-            document.getElementById("btn-prev-data").onclick = () => {
-                offsetSemana -= 7;
-                gerarDias();
-            };
-
-            document.querySelectorAll(".barbeiro-avatar").forEach(avatar => {
-                avatar.onclick = () => {
-                    document.querySelectorAll(".barbeiro-avatar").forEach(el => el.classList.remove("ativo"));
-                    avatar.classList.add("ativo");
-                    inputBarbeiro.value = avatar.dataset.id;
-                    carregarHorarios();
-                };
-            });
-
-            function gerarHorariosArray() {
-                const h = [];
-                function add(i, f) {
-                    let [hh, mm] = i.split(":").map(Number);
-                    const [hf, mf] = f.split(":").map(Number);
-                    while (hh < hf || (hh === hf && mm <= mf)) {
-                        h.push(`${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`);
-                        mm += 30; if (mm >= 60) { mm = 0; hh++; }
-                    }
-                }
-                add("08:30", "12:00");
-                add("13:30", "21:00");
-                return h;
-            }
-
-            function renderHorarios() {
-                const horarios = gerarHorariosArray();
-                horariosContainer.innerHTML = "";
-
-                horarios.forEach(h => {
-                    if (horariosOcupados.includes(h)) return;
-
-                    const btn = document.createElement("button");
-                    btn.type = "button";
-                    btn.innerText = h;
-                    btn.classList.add("horario-btn");
-
-                    btn.onclick = () => {
-                        document.querySelectorAll(".horario-btn").forEach(b => b.classList.remove("selecionado"));
-                        btn.classList.add("selecionado");
-                        inputHorario.value = h;
-                    };
-
-                    horariosContainer.appendChild(btn);
-                });
-            }
-
-            function carregarHorarios() {
-                if (!inputBarbeiro.value || !inputData.value) return;
-
-                horariosContainer.innerHTML = "<div class='caixa-aviso'>Carregando...</div>";
-
-                fetch(`/horarios-ocupados?barbeiro_id=${inputBarbeiro.value}&data=${inputData.value}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        horariosOcupados = data;
-                        renderHorarios();
-                    });
-            }
-
-            gerarDias();
-        });
-
-        function cancelarAgendamento(id, data, horario) {
-            if (!confirm("Cancelar agendamento?")) return;
-
-            fetch(`/cancelar-agendamento/${id}`, { method: "POST" })
-                .then(() => location.reload());
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=3"></script>
 
 </body>
 
