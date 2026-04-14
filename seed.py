@@ -1,18 +1,18 @@
 from app import app, db
-from models import Barbeiro, Servico # <-- Adicionamos o import do Servico aqui
+from models import Barbeiro, Servico
 
 with app.app_context():
     # 1. Cria as tabelas
     db.create_all()
     
-    # 2. Adiciona os Barbeiros (Verifique se o '.jpg' ou '.png' está EXATAMENTE igual ao arquivo)
+    # 2. Adiciona os Barbeiros (Agora com a extensão correta .png)
     barbeiros = [
-        Barbeiro(nome="Carlos Silva", especialidade="Cortes clássicos", foto="carlos.jpg"),
-        Barbeiro(nome="João Mendes", especialidade="Fade e degradê", foto="joao.jpg")
+        Barbeiro(nome="Carlos Silva", especialidade="Cortes clássicos", foto="carlos.png"),
+        Barbeiro(nome="João Mendes", especialidade="Fade e degradê", foto="joao.png")
     ]
     db.session.add_all(barbeiros)
 
-    # 3. Adiciona os Serviços
+    # 3. Adiciona os Serviços para o agendamento funcionar
     servicos = [
         Servico(nome="Corte Clássico", preco=35.00),
         Servico(nome="Barba Tradicional", preco=25.00),
@@ -23,4 +23,4 @@ with app.app_context():
 
     db.session.commit()
 
-    print("Banco de dados criado com barbeiros e serviços!")
+    print("Banco de dados atualizado com fotos em PNG e serviços adicionados!")
