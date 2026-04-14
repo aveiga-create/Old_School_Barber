@@ -825,62 +825,61 @@ footer {
   list-style: none;
   gap: 30px; /* Espaço entre as abas */
 }
-
 /* ==========================================
    RESPONSIVIDADE (SMARTPHONES E TABLETS)
    ========================================== */
 @media (max-width: 768px) {
-  /* 1. Ajuste do Cabeçalho (Navbar) */
-  .navbar {
-    flex-direction: column; /* Coloca a logo em cima e os botões embaixo */
-    padding: 15px 20px;
-  }
+    /* 1. Ajuste do Cabeçalho (Navbar) */
+    .navbar {
+        flex-direction: column; /* Coloca a logo em cima e os botões embaixo */
+        padding: 15px 20px;
+    }
 
-  .logo-img {
-    height: 50px; /* Diminui a logo um pouco */
-    margin-bottom: 15px;
-  }
+    .logo-img {
+        height: 50px; /* Diminui a logo um pouco */
+        margin-bottom: 15px;
+    }
 
-  .nav-links {
-    flex-wrap: wrap; /* Permite que os botões quebrem a linha se não couberem */
-    justify-content: center;
-    gap: 15px;
-    padding: 0;
-  }
+    .nav-links {
+        flex-wrap: wrap; /* Permite que os botões quebrem a linha se não couberem */
+        justify-content: center;
+        gap: 15px;
+        padding: 0;
+    }
 
-  /* 2. Ajuste dos Títulos Retrô */
-  .titulo-retro {
-    font-size: 2rem; /* Fonte menor para não vazar da tela */
-    letter-spacing: 2px;
-    margin-bottom: 30px;
-  }
+    /* 2. Ajuste dos Títulos Retrô */
+    .titulo-retro {
+        font-size: 2rem; /* Fonte menor para não vazar da tela */
+        letter-spacing: 2px;
+        margin-bottom: 30px;
+    }
 
-  /* 3. Ajuste do Banner Inicial (Hero) */
-  .hero-content h2 {
-    font-size: 2.2rem;
-  }
+    /* 3. Ajuste do Banner Inicial (Hero) */
+    .hero-content h2 {
+        font-size: 2.2rem;
+    }
+    
+    .hero-content p {
+        font-size: 1.1rem;
+    }
 
-  .hero-content p {
-    font-size: 1.1rem;
-  }
-
-  /* 4. Ajuste dos Cards (Serviços e Barbeiros) */
-  .cards-grid {
-    display: grid;
-    grid-template-columns: 1fr; /* Força a ficar em 1 única coluna */
-    gap: 20px;
-  }
+    /* 4. Ajuste dos Cards (Serviços e Barbeiros) */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Força a ficar em 1 única coluna */
+        gap: 20px;
+    }
 }
 
 /* Ajuste extra para telas muito pequenas (ex: iPhone SE) */
 @media (max-width: 480px) {
-  .titulo-retro {
-    font-size: 1.8rem;
-  }
-  .hero-content h2 {
-    font-size: 1.8rem;
-  }
-  .nav-links {
-    font-size: 0.9rem;
-  }
+    .titulo-retro {
+        font-size: 1.8rem;
+    }
+    .hero-content h2 {
+        font-size: 1.8rem;
+    }
+    .nav-links {
+        font-size: 0.9rem;
+    }
 }
