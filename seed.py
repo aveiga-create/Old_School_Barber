@@ -7,8 +7,8 @@ with app.app_context():
     
     # 2. DEPOIS INSERE OS DADOS
     barbeiros = [
-        Barbeiro(nome="Carlos Silva", especialidade="Cortes clássicos", foto="carlos.jpg"),
-        Barbeiro(nome="João Mendes", especialidade="Fade e degradê", foto="joao.jpg")
+        Barbeiro(nome="Carlos ", especialidade="Cortes clássicos", foto="carlos.jpg"),
+        Barbeiro(nome="João ", especialidade="Fade e degradê", foto="joao.jpg")
     ]
 
     db.session.add_all(barbeiros)
