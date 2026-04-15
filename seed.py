@@ -8,7 +8,7 @@ with app.app_context():
     # 2. Adiciona os Barbeiros (Agora com a extensão correta .png)
     barbeiros = [
         Barbeiro(nome="Carlos Silva", especialidade="Cortes clássicos", foto="carlos.png"),
-        Barbeiro(nome="João Mendes", especialidade="Fade e degradê", foto="joao.png")
+        Barbeiro(nome="João Mendes", especialidade="Corte e degradê", foto="joao.png")
     ]
     db.session.add_all(barbeiros)
 
